@@ -65,6 +65,29 @@ async function run() {
    res.json(result)
   })
 
+   //  update Admin ROle ///
+
+   app.put('/users',async(req,res)=>{
+
+    const user=req.body;
+    const filter={email:user.email}
+   
+
+    console.log(user.email);
+
+    const updateDoc = {
+      $set: {
+        role: "admin"
+      },
+    };
+
+    const result=await UsersCollection.updateOne(filter,updateDoc);
+
+  res.json(result)
+   
+  })
+  
+
    // Get All USers //
 
    app.get('/users',async(req,res)=>{
@@ -75,6 +98,24 @@ async function run() {
 
       res.json(result)
   })
+
+   //  Get Admins ///
+
+   app.get('/user/admin/:email', async(req,res)=>{
+
+    const email= req.params.email;
+     let isAdmin=false
+    const query={email:email}
+    const user=await UsersCollection.findOne(query);
+
+    if(user?.role==="admin"){
+      isAdmin=true
+
+    }
+
+    res.json({admin : isAdmin})
+ })
+ 
 
   } finally {
     // Ensures that the client will close when you finish/error
