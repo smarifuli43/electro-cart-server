@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
     const database = client.db('Electro-cart-server');
     const productsCollection = database.collection('products');
+    const UsersCollection=database.collection('users');
     // Query for a movie that has the title 'Back to the Future'
               
       //  GET all Products///
@@ -35,6 +36,44 @@ async function run() {
         const result=await cursor.toArray()
 
     res.json(result)
+  })
+            
+
+  // POST ALL USERS ///
+          
+  app.post('/users',async (req,res)=>{
+    console.log('user Post api hit');
+   const user=req.body;
+
+   const result=await UsersCollection.insertOne(user);
+
+   res.send(result)
+  
+  });
+
+   //  Update For Google USers///
+   app.post('/users',async(req,res)=>{
+
+    const user=req.body;
+
+    const filter = { email:user.email};
+    console.log(user);
+    const options = { upsert: true };
+    const updateDoc = {$set:user};
+  const result= await  UsersCollection.updateOne(filter,updateDoc,options);
+
+   res.json(result)
+  })
+
+   // Get All USers //
+
+   app.get('/users',async(req,res)=>{
+
+    const cursor =UsersCollection.find({});
+
+      const result=await cursor.toArray()
+
+      res.json(result)
   })
 
   } finally {
