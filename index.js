@@ -25,6 +25,7 @@ async function run() {
 
     const database = client.db('Electro-cart-server');
     const productsCollection = database.collection('products');
+    const ordersCollection = database.collection('orders');
 
     // get specific product
     app.get('/products/:id', async (req, res) => {
@@ -32,6 +33,14 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const product = await productsCollection.findOne(query);
       res.send(product);
+    });
+
+    // POST order API
+    app.post('/orders', async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await ordersCollection.insertOne(product);
+      res.json(result);
     });
   } finally {
     // await client.close();
