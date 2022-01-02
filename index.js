@@ -1,25 +1,21 @@
-const { MongoClient, Admin } = require("mongodb");
-const ObjectId=require('mongodb').ObjectId;
-const express=require('express');
-const cors=require('cors');
-require("dotenv").config();
+const { MongoClient, Admin } = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
+const app = express();
 
-const app=(express())
+const port = process.env.PORT || 9000;
 
-
-
-
-const port =process.env.PORT || 9000;
-
-
-app.use(express.json())
-app.use(cors())
-
+app.use(express.json());
+app.use(cors());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0qtlc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 async function run() {
   try {
@@ -27,15 +23,16 @@ async function run() {
     await client.connect();
     const database = client.db('Electro-cart-server');
     const productsCollection = database.collection('products');
-              
-      //  GET all Products///
-    app.get('/products',async(req,res)=>{
-        const cursor=productsCollection.find({});
-        const result=await cursor.toArray()
-    res.json(result)
-      })
-    
-        // get specific product
+    const UsersCollection = database.collection('users');
+
+    //  GET all Products///
+    app.get('/products', async (req, res) => {
+      const cursor = productsCollection.find({});
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
+    // get specific product
     app.get('/products/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -43,9 +40,45 @@ async function run() {
       res.send(product);
     });
 
+    // POST ALL USERS ///
+
+    app.post('/users', async (req, res) => {
+      console.log('user Post api hit');
+      const user = req.body;
+
+      const result = await UsersCollection.insertOne(user);
+
+      res.send(result);
+    });
+
+    //  Update For Google USers///
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+
+      const filter = { email: user.email };
+      console.log(user);
+      const options = { upsert: true };
+      const updateDoc = { $set: user };
+      const result = await UsersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+
+      res.json(result);
+    });
+
+    // Get All USers //
+
+    app.get('/users', async (req, res) => {
+      const cursor = UsersCollection.find({});
+
+      const result = await cursor.toArray();
+
+      res.json(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
-    
     // await client.close();
   }
 }
