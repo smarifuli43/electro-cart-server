@@ -4,10 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "start-dev":"nodemon index.js"
     
+=======
+    "start": "node index.js",
+    "start-dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+>>>>>>> ariful
   },
   "keywords": [],
   "author": "",
