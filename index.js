@@ -23,7 +23,7 @@ async function run() {
     await client.connect();
     const database = client.db('Electro-cart-server');
     const productsCollection = database.collection('products');
-    const UsersCollection = database.collection('users');
+    const usersCollection = database.collection('users');
     const ordersCollection = database.collection('orders');
     const ratingsCollection = database.collection('ratings');
     //  GET all Products///
@@ -47,7 +47,7 @@ async function run() {
       console.log('user Post api hit');
       const user = req.body;
 
-      const result = await UsersCollection.insertOne(user);
+      const result = await usersCollection.insertOne(user);
 
       res.send(result);
     });
@@ -60,7 +60,7 @@ async function run() {
       console.log(user);
       const options = { upsert: true };
       const updateDoc = { $set: user };
-      const result = await UsersCollection.updateOne(
+      const result = await usersCollection.updateOne(
         filter,
         updateDoc,
         options
@@ -104,7 +104,7 @@ async function run() {
       console.log(user);
       const options = { upsert: true };
       const updateDoc = { $set: user };
-      const result = await UsersCollection.updateOne(
+      const result = await usersCollection.updateOne(
         filter,
         updateDoc,
         options
@@ -127,7 +127,7 @@ async function run() {
         },
       };
 
-      const result = await UsersCollection.updateOne(filter, updateDoc);
+      const result = await usersCollection.updateOne(filter, updateDoc);
 
       res.json(result);
     });
@@ -135,7 +135,7 @@ async function run() {
     // Get All USers //
 
     app.get('/users', async (req, res) => {
-      const cursor = UsersCollection.find({});
+      const cursor = usersCollection.find({});
 
       const result = await cursor.toArray();
 
@@ -148,7 +148,7 @@ async function run() {
       const email = req.params.email;
       let isAdmin = false;
       const query = { email: email };
-      const user = await UsersCollection.findOne(query);
+      const user = await usersCollection.findOne(query);
 
       if (user?.role === 'admin') {
         isAdmin = true;
