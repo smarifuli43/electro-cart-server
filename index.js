@@ -23,9 +23,9 @@ async function run() {
     await client.connect();
     const database = client.db('Electro-cart-server');
     const productsCollection = database.collection('products');
-    const UsersCollection = database.collection('users');
+    const usersCollection = database.collection('users');
     const ordersCollection = database.collection('orders');
-
+    const ratingsCollection = database.collection('ratings');
     //  GET all Products///
     app.get('/products', async (req, res) => {
       const cursor = productsCollection.find({});
@@ -46,7 +46,7 @@ async function run() {
       console.log('user Post api hit');
       const user = req.body;
 
-      const result = await UsersCollection.insertOne(user);
+      const result = await usersCollection.insertOne(user);
 
       res.send(result);
     });
@@ -59,21 +59,13 @@ async function run() {
       console.log(user);
       const options = { upsert: true };
       const updateDoc = { $set: user };
-      const result = await UsersCollection.updateOne(
+      const result = await usersCollection.updateOne(
         filter,
         updateDoc,
         options
       );
 
       res.json(result);
-    });
-
-    // Get All USers //
-
-    app.get('/users', async (req, res) => {
-      const cursor = UsersCollection.find({});
-
-      const result = await cursor.toArray();
     });
 
     // POST order API
@@ -84,6 +76,150 @@ async function run() {
       res.json(result);
     });
 
+    // Query for a movie that has the title 'Back to the Future'
+
+    //  GET all Products///
+    app.get('/products', async (req, res) => {
+      const cursor = productsCollection.find({});
+
+      const result = await cursor.toArray();
+
+      res.json(result);
+    });
+
+    // get all Orders //
+
+    app.get('/orders', async (req, res) => {
+      const cursor = ordersCollection.find({});
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
+    //  Update For Google USers///
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+
+      const filter = { email: user.email };
+      console.log(user);
+      const options = { upsert: true };
+      const updateDoc = { $set: user };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+
+      res.json(result);
+    });
+
+    //  update Admin ROle ///
+
+    app.put('/users', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+
+      console.log(user.email);
+
+      const updateDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+
+      const result = await usersCollection.updateOne(filter, updateDoc);
+
+      res.json(result);
+    });
+
+    // Get All USers //
+
+    app.get('/users', async (req, res) => {
+      const cursor = usersCollection.find({});
+
+      const result = await cursor.toArray();
+
+      res.json(result);
+    });
+
+    //  Get Admins ///
+
+    app.get('/user/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      let isAdmin = false;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+
+      if (user?.role === 'admin') {
+        isAdmin = true;
+      }
+
+      res.json({ admin: isAdmin });
+    });
+
+    //  change pending to active //
+    app.put('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log('id ', id);
+
+      const updateUser = req.body;
+      console.log(updateUser);
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          status: `shipped`,
+        },
+      };
+
+      const result = await ordersCollection.updateMany(
+        filter,
+        updateDoc,
+        options
+      );
+
+      res.json(result);
+    });
+
+    //  delete order as Admin ///
+
+    app.delete('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+
+      const query = { _id: ObjectId(id) };
+
+      const result = await ordersCollection.deleteOne(query);
+
+      res.send(result);
+    });
+
+    // Add New tool to Data base //
+    app.post('/products', async (req, res) => {
+      const product = req.body;
+
+      const result = await productsCollection.insertOne(product);
+
+      res.send(result);
+    });
+
+    // get all Orders //
+
+    app.get('/orders', async (req, res) => {
+      const cursor = ordersCollection.find({});
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
+    //  Get User Orders //
+
+    app.get('/order/:email', async (req, res) => {
+      const userEmail = req.params.email;
+
+      const query = { email: userEmail };
+      const cursor = ordersCollection.find(query);
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
     // get orders
     app.get('/orders', async (req, res) => {
       const cursor = ordersCollection.find({});
@@ -91,26 +227,38 @@ async function run() {
       res.json(products);
     });
 
-    // UPDATE status API
-    app.put('/orders/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: ObjectId(id) };
-      const updateDoc = {
-        $set: {
-          status: 'shifted',
-        },
-      };
-      const result = await ordersCollection.updateOne(filter, updateDoc);
-      console.log(result);
+    // // DELETE ORDERS
+    // app.delete('/orders/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: ObjectId(id) };
+    //   const result = await ordersCollection.deleteOne(query);
+    //   res.json(result);
+    // });
+    //  Delete User Purchase //
+
+    app.delete('/order/:email', async (req, res) => {
+      const id = req.params.email;
+
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
       res.send(result);
     });
 
-    // DELETE ORDERS
-    app.delete('/orders/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await ordersCollection.deleteOne(query);
+    // get Ratings by users ///
+
+    app.get('/reviews', async (req, res) => {
+      const cursor = ratingsCollection.find({});
+
+      const result = await cursor.toArray();
       res.json(result);
+    });
+    // POst Ratings By users //
+    app.post('/reviews', async (req, res) => {
+      const data = req.body;
+
+      const result = await ratingsCollection.insertOne(data);
+
+      res.send(result);
     });
   } finally {
     // Ensures that the client will close when you finish/error
