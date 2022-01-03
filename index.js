@@ -42,7 +42,6 @@ async function run() {
     });
 
     // POST ALL USERS ///
-
     app.post('/users', async (req, res) => {
       console.log('user Post api hit');
       const user = req.body;
