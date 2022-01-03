@@ -84,6 +84,13 @@ async function run() {
       const result = await ordersCollection.insertOne(product);
       res.json(result);
     });
+
+    // get orders
+    app.get('/orders', async (req, res) => {
+      const cursor = ordersCollection.find({});
+      const products = await cursor.toArray();
+      res.json(products);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
