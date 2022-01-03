@@ -91,6 +91,20 @@ async function run() {
       const products = await cursor.toArray();
       res.json(products);
     });
+
+    // UPDATE status API
+    app.put('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'shifted',
+        },
+      };
+      const result = await ordersCollection.updateOne(filter, updateDoc);
+      console.log(result);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
