@@ -76,8 +76,6 @@ async function run() {
       res.json(result);
     });
 
-    // Query for a movie that has the title 'Back to the Future'
-
     //  GET all Products///
     app.get('/products', async (req, res) => {
       const cursor = productsCollection.find({});
